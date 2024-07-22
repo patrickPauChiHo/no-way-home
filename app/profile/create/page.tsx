@@ -1,9 +1,9 @@
-import SubmitButton from "@/components/form/Button";
 import FormContainer from "@/components/form/FormContainer";
-import FormInput from "@/components/form/formInput";
+import FormInput from "../../../components/form/FormInput";
 import { createProfileAction } from "@/utils/action";
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { SubmitButton } from "@/components/form/Button";
 
 async function CreateProfilePage() {
   const user = await currentUser();
@@ -22,6 +22,7 @@ async function CreateProfilePage() {
             <FormInput type="text" name="lastName" label="Last Name" />
             <FormInput type="text" name="username" label="username" />
           </div>
+
           <SubmitButton text="Create Profile" className="mt-8" />
         </FormContainer>
       </div>
