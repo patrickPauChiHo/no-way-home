@@ -180,27 +180,31 @@ export const fetchProperties = async ({
   search?: string;
   category?: string;
 }) => {
-  const properties = await db.property.findMany({
-    where: {
-      category,
-      OR: [
-        { name: { contains: search, mode: "insensitive" } },
-        { tagline: { contains: search, mode: "insensitive" } },
-      ],
-    },
-    select: {
-      id: true,
-      name: true,
-      tagline: true,
-      country: true,
-      price: true,
-      image: true,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
-  return properties;
+  try {
+    const properties = await db.property.findMany({
+      where: {
+        category,
+        OR: [
+          { name: { contains: search, mode: "insensitive" } },
+          { tagline: { contains: search, mode: "insensitive" } },
+        ],
+      },
+      select: {
+        id: true,
+        name: true,
+        tagline: true,
+        country: true,
+        price: true,
+        image: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+    return properties;
+  } catch (error) {
+    return renderError(error);
+  }
 };
 
 export const fetchFavouriteId = async ({
@@ -286,82 +290,6 @@ export const fetchProperty = async (id: string) => {
     },
     include: {
       profile: true,
-    },
-  });
-};
-
-export const createReviewAction = async (
-  prevState: any,
-  formData: FormData
-) => {
-  const user = await getAuthUser();
-  try {
-    const rawData = Object.fromEntries(formData);
-    const validatedFields = validatedWithZodSchema(createReviewSchema, rawData);
-
-    await db.review.create({
-      data: {
-        ...validatedFields,
-        profileId: user.id,
-      },
-    });
-    revalidatePath(`/properties/${validatedFields.propertyId}`);
-    return { message: "Review Submitted Successfully" };
-  } catch (error) {
-    return renderError(error);
-  }
-};
-
-export const fetchPropertyReviews = async (propertyId: string) => {
-  const reviews = await db.review.findMany({
-    where: {
-      propertyId,
-    },
-    select: {
-      id: true,
-      rating: true,
-      comment: true,
-      profile: {
-        select: {
-          firstName: true,
-          profileImage: true,
-        },
-      },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
-  return reviews;
-};
-
-export const fetchPropertyReviewsByUser = async () => {
-  const user = await getAuthUser();
-  const reviews = await db.review.findMany({
-    where: {
-      profileId: user.id,
-    },
-    select: {
-      id: true,
-      rating: true,
-      comment: true,
-      property: {
-        select: {
-          name: true,
-          image: true,
-        },
-      },
-    },
-  });
-
-  return reviews;
-};
-
-export const findExistingReview = async (useId: string, propertyId: string) => {
-  return db.review.findFirst({
-    where: {
-      profileId: useId,
-      propertyId,
     },
   });
 };
