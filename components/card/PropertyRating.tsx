@@ -1,4 +1,6 @@
 import { FaStar } from "react-icons/fa";
+import { fetchPropertyRating } from "@/utils/action";
+import { use } from "react";
 
 function PropertyRating({
   propertyId,
@@ -9,8 +11,8 @@ function PropertyRating({
 }) {
   //temp
 
-  const rating = 4.6;
-  const count = 100;
+  const { rating, count } = use(fetchPropertyRating(propertyId));
+  if (count === 0) return null;
 
   const className = `flex gap-1 items-center ${inPage ? "text-md" : "tsxt-xs"}`;
 

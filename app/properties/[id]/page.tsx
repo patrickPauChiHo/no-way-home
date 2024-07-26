@@ -8,11 +8,16 @@ import ImageContainer from "@/components/properties/ImageContainer";
 import PropertyDetails from "@/components/properties/PropertyDetails";
 import ShareButton from "@/components/properties/ShareButton";
 import UserInfo from "@/components/properties/UserInfo";
+import PropertyReviews from "@/components/reviews/PropertyReviews";
+import SubmitReview from "@/components/reviews/SubmitReview";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { fetchProperty } from "@/utils/action";
 import dynamic from "next/dynamic";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
+import { findExistingReview } from "@/utils/action";
+import { auth } from "@clerk/nextjs/server";
 
 const DynamicMap = dynamic(
   () => import("@/components/properties/PropertyMap"),
@@ -29,6 +34,12 @@ async function PropertyDetailsPage({ params }: { params: { id: string } }) {
   const firstName = property.profile.firstName;
   const profileImage = property.profile.profileImage;
   const profile = { profileImage, firstName };
+
+  const { userId } = auth();
+  const isNotOwner = property.profile.clerkId !== userId;
+  const reviewDoesNotExist =
+    userId && isNotOwner && !(await findExistingReview(userId, property.id));
+
   return (
     <section>
       <BreadCrumbs name={property.name} />
@@ -45,7 +56,9 @@ async function PropertyDetailsPage({ params }: { params: { id: string } }) {
         <div className="lg:col-span-8">
           <div className="flex gap-x-4 items-center">
             <h1 className="text-xl font-bold">{property.name}</h1>
-            <PropertyRating inPage propertyId={property.id} />
+            <Suspense fallback={<div></div>}>
+              <PropertyRating inPage propertyId={property.id} />
+            </Suspense>
           </div>
           <PropertyDetails details={details} />
           <UserInfo profile={profile} />
@@ -59,6 +72,10 @@ async function PropertyDetailsPage({ params }: { params: { id: string } }) {
           <BookingCalender />
         </div>
       </section>
+      {reviewDoesNotExist && <SubmitReview propertyId={property.id} />}
+      <Suspense fallback={<div></div>}>
+        <PropertyReviews propertyId={property.id} />
+      </Suspense>
     </section>
   );
 }
