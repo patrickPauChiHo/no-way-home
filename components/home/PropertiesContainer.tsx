@@ -3,7 +3,6 @@ import PropertiesList from "./PropertiesList";
 import EmptyList from "./EmptyList";
 import type { PropertyCardProps } from "@/utils/types";
 import { use } from "react";
-import { log } from "console";
 
 function PropertiesContainer({
   category,
